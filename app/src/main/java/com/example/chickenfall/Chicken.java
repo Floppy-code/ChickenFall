@@ -6,16 +6,21 @@ import android.graphics.Matrix;
 import java.util.Random;
 
 public class Chicken extends Entity {
-    private boolean hit;
-    private boolean direction; //false - dolava      true - doprava
-    private boolean spriteDirection; //false - dolava      true - doprava
-    private int screenX;
-    private int screenY;
-    private int distanceFromScreen;
-    private int[] spriteLocationArray;
-    private Bitmap[] sprites;
-    private int frame = 0;
+    private boolean hit;        //Ukazovatel ci bolo npc trafene
+    private boolean direction;  //Smer ktorym npc leti          false - dolava      true - doprava
+    private boolean spriteDirection; //Smer otocenia spritu npc false - dolava      true - doprava
+    private int screenX;        //X suradnica npc na obrazovke
+    private int screenY;        //Y suradnica npc na obrazovke
+    private int distanceFromScreen; //"Z suradnica" naznacuje ako daleko je npc od kamery
+    private int[] spriteLocationArray;  //Tabulka lokacii spritov v resources, urcena pre animacie
+    private Bitmap[] sprites;   //Tabulka bitmap spritov, urcena pre animacie
+    private int frame = 0;      //Counter pre pocet snimkov/tikov hry ktore ubehli
 
+    /**
+     * Konstruktor pre triedu Chicken, sluzi ako hlavne npc v
+     * hre. Nacitava default sprite a sprite urcene pre animacie
+     * @param bitmapLocation Lokacia default spritu v resources
+     */
     public Chicken(int bitmapLocation) {
         super(bitmapLocation);
         this.hit = false;
@@ -30,6 +35,10 @@ public class Chicken extends Entity {
         frame = rand.nextInt(60);
     }
 
+    /**
+     * Stara sa o spravanie npc pocas hry. Ovlada animacie spritov
+     * a pohyb NPC
+     */
     public void tick() {
         int chickenSpeed = 4;
         if(hit) {
@@ -57,6 +66,11 @@ public class Chicken extends Entity {
         frame = frame % 60;
     }
 
+    /**
+     * Na zaklede toho kolkaty frame v sekunde ide, posle iny
+     * sprite. Tymto je mozne docielit efekt animacie.
+     * @return
+     */
     @Override
     public Bitmap getSprite() {
         if (frame >= 0 && frame < 8) {
@@ -77,38 +91,76 @@ public class Chicken extends Entity {
         return sprites[0];
     }
 
+    /**
+     * Vracia X-suradnicu kde sa nachadza npc oproti lavemu
+     * hornemu rohu pozadia
+     * @return X-suradnica oproti pozadiu
+     */
     public int getScreenX() {
         return screenX;
     }
 
+    /**
+     * Nastavuje X suradnicu npc oproti pozadiu
+     * @param screenX X-suradnica
+     */
     public void setScreenX(int screenX) {
         this.screenX = screenX;
     }
 
+    /**
+     * Vracia Y-suradnicu kde sa nachadza npc oproti lavemu
+     * hornemu rohu pozadia
+     * @return Y-suradnica oproti pozadiu
+     */
     public int getScreenY() {
         return screenY;
     }
 
+    /**
+     * Nastavuje Y suradnicu npc oproti pozadiu
+     * @param screenY Y-suradnica
+     */
     public void setScreenY(int screenY) {
         this.screenY = screenY;
     }
 
+    /**
+     * Vracia cele pole s cestami spritov v resources
+     * @return pole ciest spritov
+     */
     public int[] getSpriteLocationArray() {
         return spriteLocationArray;
     }
 
+    /**
+     * Vracia pole bitmap vsetkych spritov
+     * @return pole bitmap spritov
+     */
     public Bitmap[] getSprites() {
         return sprites;
     }
 
+    /**
+     * Vracia vzdialenost npc od obrazovky/kamery
+     * @return vzdialenost "Z-osy"
+     */
     public int getDistanceFromScreen() {
         return distanceFromScreen;
     }
 
+    /**
+     * Vracia udaj o tom, ci bolo npc zasiahnute
+     * @return zasiahnutie
+     */
     public boolean isHit() {
         return hit;
     }
 
+    /**
+     * Nastavuje hodnotu zasiahnutia pre dane npc
+     * @param hit zasiahnutie npc
+     */
     public void setHit(boolean hit) {
         this.hit = hit;
     }
@@ -117,6 +169,10 @@ public class Chicken extends Entity {
         return direction;
     }
 
+    /**
+     * Otoci sprity pre animacie horizontalne, vyuziva sa pri
+     * zmene smeru letu.
+     */
     public void flipSprite() {
         for (int i = 0; i < sprites.length; i++) {
             Matrix matrix = new Matrix();
@@ -125,6 +181,10 @@ public class Chicken extends Entity {
         }
     }
 
+    /**
+     * Otoci sprite vlavo alebo vpravo okolo horizontalnej osi
+     * @param o smer otocenia  false - vlavo, true - vpravo
+     */
     public void setSpriteOrientation(boolean o) {
         //TRUE - doprava
         if(spriteDirection != o) {
@@ -133,10 +193,18 @@ public class Chicken extends Entity {
         }
     }
 
+    /***
+     * Nastavuje smer ktorym npc v dany tick leti
+     * @param direction smer letu   true - vlavo
+     */
     public void setDirection(boolean direction) {
         this.direction = direction;
     }
 
+    /***
+     * Nastavuje vzdialenost npc od obrazovky/kamery
+     * @param distanceFromScreen vzdialenost v metroch
+     */
     public void setDistanceFromScreen(int distanceFromScreen) {
         this.distanceFromScreen = distanceFromScreen;
     }

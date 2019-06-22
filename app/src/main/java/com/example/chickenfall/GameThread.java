@@ -1,10 +1,7 @@
 package com.example.chickenfall;
 
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.media.MediaPlayer;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -27,45 +24,49 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 public class GameThread extends Thread {
 
-    private GameView view;
-    private boolean run = false;
+    private GameView view;          //Zakladny view aplikacie
+    private boolean run = false;    //Premenna pouzivana pre hlavny while loop hry
 
-    public static final int CHICKEN_COUNT = 8;
-    public static final int ENTITY_SPRITE_COUNT = 1;
-    public static final int ENTITY_GRASS_COUNT = 5;
-    public static final int SHOT_WAIT_TIME = 80;
-    public static final int RELOAD_WAIT_TIME = 160; //TODO I guess
-    public static final int AMMO_COUNT = 6;
-    public static final int SCORE_PER_CHICKEN = 25;
-    public static final int DEFAULT_GAME_TIME = 90;
+    public static final int CHICKEN_COUNT = 8;      //Najvyssi pocet npc ktore mozu byt sucastne na obrazovke
+    public static final int ENTITY_SPRITE_COUNT = 1;//Urcuje pocet spritov nahodne generovanych entit na mape
+    public static final int ENTITY_GRASS_COUNT = 5; //Urcuje pocet Entit s texturov travy vykreslenych na mape
+    public static final int SHOT_WAIT_TIME = 80;    //Pocet tikov pocas ktorych nebude mozne vystrelit po predchadzajucom vystrele
+    public static final int RELOAD_WAIT_TIME = 160; //Pocet tikov pocas ktorych nebude mozne vystrelit po nabiti zbrane
+    public static final int AMMO_COUNT = 6;         //Pocet nabojov v zbrani
+    public static final int SCORE_PER_CHICKEN = 25; //Skore pridane za zasah jedneho NPC
+    public static final int DEFAULT_GAME_TIME = 90; //Pocet sekund pocas ktorych je mozne hrat
 
-    private Background levelBackground = null;
-    private ArrayList<Chicken> npcChickenList = null;
-    private ArrayList<Entity> entityList = null;
-    private Ammunition[] ammunition;
+    private Background levelBackground = null;      //Pozadie hry, "mapa"
+    private ArrayList<Chicken> npcChickenList = null;   //Zoznam prave spawnutych NPC
+    private ArrayList<Entity> entityList = null;    //Zoznam existujucich entit (trava, stromy, atd.)
+    private Ammunition[] ammunition;                //Pole "nabojov" vykreslenych na obrazovku
 
-    private int[] entitySpriteLocation;
-    private int shotFrameCounter = 2000;
+    private int[] entitySpriteLocation;     //Pole pre lokacie nahodne vybranych spritov entit
+    private int shotFrameCounter = 2000;    //Pocitadlo framov/tikov pocas ktorych nedoslo k vystrelu
 
-    private int timerFrameCounter = 0;
-    private int gameTime = DEFAULT_GAME_TIME;
+    private int timerFrameCounter = 0;      //Pocitadlo tikov pre cas hry (60 tikov - 1 sekunda)
+    private int gameTime = DEFAULT_GAME_TIME;   //Zostavajuci cas do konca hry
 
-    private int unusedAmmo = AMMO_COUNT;
-    private int score = 0;
+    private int unusedAmmo = AMMO_COUNT;    //Pocet nevystrelenych nabojov zbrane
+    private int score = 0;                  //Skore hraca v danej hre
 
-    private boolean showMenu = true;
-    private boolean endgame = false;
+    private boolean showMenu = true;        //Premenna ktora urcuje ci sa ma zobrazovat menu
+    private boolean endgame = false;        //Premenna ktora urcuje ci sa ma zobrazovat skore tabulka
 
     //SOUND
-    private Sound gunShot;
-    private Sound reload;
+    private Sound gunShot;  //Prehravac zvuku vystrelu
+    private Sound reload;   //Prehravac zvuku nabitia zbrane
 
     //CONTROL
-    private ScreenButton leftArrow = null;
-    private ScreenButton rightArrow = null;
-    private ScreenButton reloadAmmunition = null;
+    private ScreenButton leftArrow = null;  //Tlacidlo posunu obrazovky dolava
+    private ScreenButton rightArrow = null; //Tlacidlo posunu obrazovky doprava
+    private ScreenButton reloadAmmunition = null;   //Tlacidlo pre nabite zbrane
 
-
+    /**
+     * Konstruktor pre hlavne vlakno hry. Stara sa o hlavne funkcionality hry ako je timer, spawnovanie npc,
+     * spawnovanie entity a ich manazment.
+     * @param view pohlad aplikacie
+     */
     public GameThread(GameView view) {
         this.view = view;
         this.npcChickenList = new ArrayList<Chicken>();
