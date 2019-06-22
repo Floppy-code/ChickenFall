@@ -2,13 +2,15 @@ package com.example.chickenfall;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 
 public class MainActivity extends Activity {
 
+    /**
+     * Metoda urcujuca cinnosti po vytvoreni aktivity
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,11 +27,17 @@ public class MainActivity extends Activity {
         setContentView(new GameView(this));
     }
 
+    /**
+     * Metoda urcujuca cinnosti po pauze aktivity
+     */
     @Override
     protected void onPause() {
         super.onPause();
     }
 
+    /**
+     * Metoda urcujuca cinnosti po opatovnom otvoreni aktivity
+     */
     @Override
     protected void onResume() {
         super.onResume();

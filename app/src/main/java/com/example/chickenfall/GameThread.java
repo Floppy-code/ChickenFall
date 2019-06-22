@@ -18,6 +18,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     - Fixnut otacanie kuriat        DONE
     - Fixnut skalovanie menu        DONE
     - Crash fix
+    - Stringy ulozit do string.xml
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  */
@@ -95,54 +96,107 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Vracia pole so spritami pre ukazovatel municie
+     * @return pole spritov
+     */
     public Ammunition[] getAmmunition() {
         return ammunition;
     }
 
+    /**
+     * Vracia objekt s pozadim mapy/hry
+     * @return background entity
+     */
     public Background getLevelBackground() {
         return levelBackground;
     }
 
+    /**
+     * Vracia zoznam s npc
+     * @return zoznam npc
+     */
     public ArrayList<Chicken> getNpcChickenList() {
         return npcChickenList;
     }
 
+    /**
+     * Vracia tlacidlo pre nabite zbrane
+     * @return screenButton nabitia
+     */
     public ScreenButton getReloadAmmunition() {
         return reloadAmmunition;
     }
 
+    /**
+     * Vracia tlacidlo pre posun obrazu dolava
+     * @return screenButton posunu vlavo
+     */
     public ScreenButton getLeftArrow() {
         return leftArrow;
     }
 
+    /**
+     * Vracia tlacidlo pre posun obrazu doprava
+     * @return screenButton posunu vpravo
+     */
     public ScreenButton getRightArrow() {
         return rightArrow;
     }
 
+    /**
+     * Sluzi na kontrolu ci skoncila hra
+     * @return koniec hry
+     */
     public boolean isEndgame() {
         return endgame;
     }
 
+    /**
+     * Sluzi na kontrolu ci je teraz nutne vykreslovat menu
+     * @return vykreslenie menu
+     */
     public boolean isShowMenu() {
         return showMenu;
     }
 
+    /**
+     * Vracia skore ktore hrac nahral v poslednom kole
+     * @return skore hraca
+     */
     public int getScore() {
         return score;
     }
 
+    /**
+     * Nastavi hlavnu premennu pre while loop hry, povoluje alebo zakazuje priebeh hry
+     * @param state parameter pre hru
+     */
     public void setRun(boolean state) {
         this.run = state;
     }
 
+    /**
+     * Vracia zoznam entit ktore sluzia napr. na zobrazenie travy, stromov v skratke vsetkych
+     * objektov ktore niesu pozadie, npc alebo prvok GUI
+     * @return
+     */
     public ArrayList<Entity> getEntityList() {
         return entityList;
     }
 
+    /**
+     * Vrati momentalny cas ktory ostava do konca hry
+     * @return cas do konca hry
+     */
     public int getGameTime() {
         return gameTime;
     }
 
+    /**
+     * Nastavi pocet pouzitelnych nabojov na povodny maximalny pocet, resetuje
+     * entity nabojov pre GUI na visible
+     */
     private void reloadGun() {
         this.unusedAmmo = AMMO_COUNT;
         this.reload.play();
@@ -151,6 +205,11 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Kontroluje ci na suradniciach ktore ma dana entita je momentalne dotyk.
+     * @param btn entita na kontrolu
+     * @return entita je oznacena / neoznacena
+     */
     private boolean checkButtonPress(Entity btn) {
         int buttonSpriteWidth = btn.getSprite().getWidth();
         int buttonSpriteHeight = btn.getSprite().getHeight();
@@ -163,13 +222,31 @@ public class GameThread extends Thread {
         return false;
     }
 
-    private int checkButtonPress() {    //0 - nic  1 - dolava  2 - doprava  3 - reload
+    /**
+     * Kontroluje ci nejaky z hlabnych prvkov GUI nebol stlaceny
+     * 0 - nic  1 - dolava  2 - doprava  3 - reload
+     * @return ktore tlacidlo bolo stlacene
+     */
+    private int checkButtonPress() {
         if (this.checkButtonPress(this.leftArrow)) { return 1; }
         if (this.checkButtonPress(this.rightArrow)) { return 2; }
         if (this.checkButtonPress(this.reloadAmmunition)) { return 3; }
         return 0;
     }
 
+    /**
+     * Otaca kameru dolava/doprava podla vstupu.
+     * Otacanie kamery je docielene pomocou zmeny suradnic entit oproti suradniciam kamery.
+     * Napr. pohyb kamery doprava znamena dekrement od suradnic entit
+     * Suradnicovy system kamery:
+     * 0,0 ------------------------------------------------->X 1920, 0
+     * |
+     * |
+     * |
+     * |
+     * Y 0, 1080
+     * @param direction
+     */
     private void moveScreen(int direction) {
         int cameraMoveSpeed = 8;
 
@@ -192,6 +269,11 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Na nahodne pozicie na mape vygeneruje zadany pocet npc. Nahodne generovane su X, Y suradnice
+     * a taktiez aj vzdialenost od kamery.
+     * @param count pocet ktory bude vygenerovany
+     */
     private void spawnChickens(int count) {
         int upperLimitY = 600;
         int lowerLimitY = 50;
@@ -231,6 +313,10 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * "Vymaze" npc ktore su momentalne vygenerovane na mape. Tato metoda sluzi najma na
+     * vycistenie mapy po konci hry
+     */
     private void despawnChickens() {
         int count = this.npcChickenList.size();
         for (int i = 0; i < count; i++) {
@@ -238,6 +324,11 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Vygeneruje entity travy a na nahodne suradnice X a Y vygeneruje doplnkove entity ako su
+     * stromy, ploty, a dalsie.
+     * @param count pocet nahodnych entit na vygenerovanie
+     */
     private void spawnEntities(int count) {
         int upperLimitY = 860;
         int lowerLimitY = 770;
@@ -264,6 +355,9 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * "Vymaze" vsetky vygenerovane entity.
+     */
     private void despawnEntities() {
         int count = this.entityList.size();
         for (int i = 0; i < count; i++) {
@@ -271,11 +365,16 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Tato metoda sa stara o hlavny beh hry, kontroluje cas, ovlada pohyb npc a vyvolava metody
+     * na manazment hernej plochy. T.j. otacanie kamery, kontrola municie, ovladanie npc,
+     * despawn zostrelenych npc a zvuky vystrelu/nabitia zbrane.
+     */
     private void tick() {
-        int leftBorderLimit = 0;
-        int rightBorderLimit = -1920;
+        int leftBorderLimit = 0;        //Lava hranica pre obraz
+        int rightBorderLimit = -1920;   //Prava hranica pre obraz
 
-        //Ukoncenie ak je cas 0
+        //Prechod na scoreboard ak cas je 0
         if(this.gameTime == 0) {
             this.endgame = true;
             this.showMenu = true;
@@ -290,6 +389,7 @@ public class GameThread extends Thread {
             this.reloadGun();
         }
 
+        //Kontrola aby kamera nesla za hranice pozadia
         if (levelBackground.getPosX() > leftBorderLimit) {
             this.moveScreen(2);
         } else if (levelBackground.getPosX() < rightBorderLimit) {
@@ -362,8 +462,10 @@ public class GameThread extends Thread {
         this.shotFrameCounter++;
     }
 
+    /**
+     * Beh hry pocas toho ako sa zobrazuje menu, kontroluje ci neboli tlacidla stlacene.
+     */
     private void tickMenu() {
-
         if(view.getTouchX() >= 565 && view.getTouchX() <= 565 + 772 && view.isTouch()) {    //LEFT ARROW
             if(view.getTouchY() <= 400 + 128 && view.getTouchY() >= 400) {
                 this.showMenu = false;
@@ -371,6 +473,10 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Beh hry pocas toho ako sa zobrazuje skore, po stlacene "Replay Game" nastavuje
+     * vsetky potrebne atributy pre opakovany beh hry.
+     */
     private void tickScore() {
         if(view.getTouchX() >= 544 && view.getTouchX() <= 544 + 830 && view.isTouch()) {    //LEFT ARROW
             if(view.getTouchY() <= 508 + 128 && view.getTouchY() >= 508) {
@@ -384,10 +490,10 @@ public class GameThread extends Thread {
                 this.despawnChickens();
                 this.spawnChickens(GameThread.CHICKEN_COUNT);
 
-                this.view.reloadNullSprites();
+                this.despawnEntities();
+                this.spawnEntities(2);
 
-                //this.despawnEntities();
-                //this.spawnEntities(2);
+                this.view.loadSprites();
 
                 for(int i = 0; i < AMMO_COUNT; i++) {
                     this.ammunition[i].setVisible(true);
@@ -396,8 +502,14 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Metoda ktora riadi prve spustenie hry, v ktorej prebieha hlavny while loop
+     * hry a ktora sa stara o zamknutie canvas, poslanie canvas do GameView a po
+     * vykresleni na cavas ho posiela na obrazovku.
+     */
     @Override
     public void run() {
+        super.run();
         long lastTime = System.nanoTime();
         int frames = 0;
 
