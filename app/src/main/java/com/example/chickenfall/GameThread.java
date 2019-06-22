@@ -13,9 +13,9 @@ import java.util.Random;
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             TODO LIST
     - Timer do konca hry            DONE
-    - Pocitanie nabojov v zbrani
-    - Reloadovanie zbrane (aj zvuk)
-    - Pocitanie skore
+    - Pocitanie nabojov v zbrani    DONE
+    - Reloadovanie zbrane (aj zvuk) DONE
+    - Pocitanie skore               DONE
     - Menu
     - Vysledna screen
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -39,7 +39,7 @@ public class GameThread extends Thread {
     private ArrayList<Entity> entityList = null;
     private Ammunition[] ammunition;
 
-    private int entitySpriteLocation[];
+    private int[] entitySpriteLocation;
     private int shotFrameCounter = 2000;
 
     private int timerFrameCounter = 0;
@@ -47,6 +47,9 @@ public class GameThread extends Thread {
 
     private int unusedAmmo = AMMO_COUNT;
     private int score = 0;
+
+    private boolean showMenu = true;
+    private boolean endgame = false;
 
     //SOUND
     private Sound gunShot;
@@ -108,6 +111,14 @@ public class GameThread extends Thread {
 
     public ScreenButton getRightArrow() {
         return rightArrow;
+    }
+
+    public boolean isEndgame() {
+        return endgame;
+    }
+
+    public boolean isShowMenu() {
+        return showMenu;
     }
 
     public int getScore() {
@@ -243,7 +254,7 @@ public class GameThread extends Thread {
 
         //Ukoncenie ak je cas 0
         if(this.gameTime == 0) {
-            this.run = false;
+            this.endgame = true;
         }
 
         //POSUN OBRAZU
@@ -272,11 +283,9 @@ public class GameThread extends Thread {
                 chicken.setSpriteOrientation(false);
             }
             if (shotFrameCounter >= SHOT_WAIT_TIME) {
-                if (view.getTouchX() >= chicken.getAbsX() && view.getTouchX() <= (chicken.getAbsX() + chicken.getSprite().getWidth()) && view.isTouch()) {
-                    if (view.getTouchY() <= chicken.getAbsY() + chicken.getSprite().getHeight() && view.getTouchY() >= chicken.getAbsY() && view.isTouch()) {
-                        if (this.unusedAmmo != 0) {
-                            chicken.setHit(true);
-                        }
+                if (this.checkButtonPress(chicken)) {
+                    if (this.unusedAmmo != 0) {
+                        chicken.setHit(true);
                     }
                 }
             }
@@ -295,7 +304,11 @@ public class GameThread extends Thread {
                     lastUnused = ammunition[i];
                 }
             }
-            lastUnused.setVisible(false);
+            try {
+                lastUnused.setVisible(false);
+            } catch (NullPointerException e) {
+                System.out.println("Ammo sprite nullptr exception!");
+            }
         }
 
         //Delete zostrelenych sliepok
@@ -325,6 +338,10 @@ public class GameThread extends Thread {
         this.shotFrameCounter++;
     }
 
+    private void tickMenu() {
+
+    }
+
     @Override
     public void run() {
         long lastTime = System.nanoTime();
@@ -338,7 +355,11 @@ public class GameThread extends Thread {
             Canvas c = null;
 
             //Tick hry
-            this.tick();
+            if(this.showMenu) {
+                this.tickMenu();
+            } else {
+                this.tick();
+            }
 
             //Vykreslovanie
             try {

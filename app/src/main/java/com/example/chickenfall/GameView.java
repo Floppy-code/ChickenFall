@@ -30,6 +30,7 @@ public class GameView extends SurfaceView {
     private boolean touch = false;
 
     private Background gameBackground = null;
+    private Background menuBackground = null;
 
     public GameView(Context context) {
         super(context);
@@ -129,6 +130,10 @@ public class GameView extends SurfaceView {
         gameBackground.setSprite(BitmapFactory.decodeResource(getResources(), gameBackground.getSpriteLocation()));
         gameBackground.setSprite(changeBitmapSize(gameBackground.getSprite(), (int)(3840 * scale), (int)(1080 * scale)));
 
+        menuBackground = new Background(R.mipmap.menu_background, 0, 0);
+        menuBackground.setSprite(BitmapFactory.decodeResource(getResources(), menuBackground.getSpriteLocation()));
+        menuBackground.setSprite(changeBitmapSize(menuBackground.getSprite(), (int)(1920 * scale), (int)(1080 * scale)));
+
         //KONFIGURACIA NPC
         try {
             for (Chicken chickenNPC : gameThread.getNpcChickenList()) {
@@ -198,67 +203,86 @@ public class GameView extends SurfaceView {
         }
     }
 
+    private void drawMenu(Canvas c) {
+        c.drawBitmap(menuBackground.getSprite(), menuBackground.getPosX(), menuBackground.getPosY(), null);
+        Paint text = new Paint(Color.BLACK);
+        text.setTextSize(128);
+        c.drawText("START GAME", (int)(565 * scale), (int)(540 * scale), text);
+    }
+
+    public void drawScore(Canvas c) {
+
+    }
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (canvas != null) {
             try {
-                //Vykreslenie pozadia
-                canvas.drawBitmap(gameBackground.getSprite(), gameBackground.getPosX(), gameBackground.getPosY(), null);
-
-                //Vykreslenie NPC
-                if (gameThread.getNpcChickenList().size() != 0) {
-                    for (Chicken chicken : gameThread.getNpcChickenList()) {
-                        if (chicken.getAbsX() > (0 - chicken.getSprite().getWidth()) && chicken.getAbsX() < 1920){  //Kontrola vykreslovania len tych co maju byt na obrazovke
-                            canvas.drawBitmap(chicken.getSprite(), (int)(chicken.getAbsX() * scale), (int)(chicken.getAbsY() * this.scale), null);
-                        }
+                if(gameThread.isShowMenu()) {
+                    if(!gameThread.isEndgame()) {
+                        this.drawMenu(canvas);
+                    } else {
+                        this.drawScore(canvas);
                     }
-                }
-
-                //Vykreslenie Objektov pred NPC
-                if (gameThread.getEntityList().size() != 0) {
-                    for (Entity entity : gameThread.getEntityList()) {
-                        if (entity.getAbsX() > (0 - entity.getSprite().getWidth()) && entity.getAbsX() < 1920) {    //Kontrola vykreslovania len tych co maju byt na obrazovke
-                            canvas.drawBitmap(entity.getSprite(), (int)(entity.getAbsX() * scale), (int)(entity.getAbsY() * scale), null);
-                        }
-                    }
-                }
-
-                //Vykreslenie SW tlacidiel
-                canvas.drawBitmap(gameThread.getLeftArrow().getSprite(), (int)(gameThread.getLeftArrow().getAbsX() * scale), (int)(gameThread.getLeftArrow().getAbsY() * scale), null);
-                canvas.drawBitmap(gameThread.getRightArrow().getSprite(), (int)(gameThread.getRightArrow().getAbsX() * scale), (int)(gameThread.getRightArrow().getAbsY() * scale), null);
-                canvas.drawBitmap(gameThread.getReloadAmmunition().getSprite(), (int)(gameThread.getReloadAmmunition().getAbsX() * scale), (int)(gameThread.getReloadAmmunition().getAbsY() * scale), null);
-
-                //Vykreslenie nabojov
-                for (int i = 0; i < gameThread.AMMO_COUNT; i++) {
-                    Ammunition ammo = gameThread.getAmmunition()[i];
-                    if (ammo.isVisible()) {
-                        canvas.drawBitmap(ammo.getSprite(), (int)(ammo.getAbsX() * scale), (int)(ammo.getAbsY() * scale), null);
-                    }
-                }
-
-                //Vykreslenie casu do konca hry
-                Paint timerColor = new Paint();
-                timerColor.setTextSize(64);
-                if (gameThread.getGameTime() <= 20) {
-                    timerColor.setColor(Color.RED);
                 } else {
-                    timerColor.setColor(Color.BLACK);
-                }
-                canvas.drawText(Integer.toString(gameThread.getGameTime()), (int)((this.displaySizeX / 2) - 64), (int)(65 * scale), timerColor);
+                    //Vykreslenie pozadia
+                    canvas.drawBitmap(gameBackground.getSprite(), gameBackground.getPosX(), gameBackground.getPosY(), null);
 
-                //Vykreslenie score
-                Paint scoreColor = new Paint(Color.BLACK);
-                scoreColor.setTextSize(64);
-                canvas.drawText("SCORE: " + Integer.toString(gameThread.getScore()), (int)(10 * scale), (int)(65 * scale), scoreColor);
+                    //Vykreslenie NPC
+                    if (gameThread.getNpcChickenList().size() != 0) {
+                        for (Chicken chicken : gameThread.getNpcChickenList()) {
+                            if (chicken.getAbsX() > (0 - chicken.getSprite().getWidth()) && chicken.getAbsX() < 1920) {  //Kontrola vykreslovania len tych co maju byt na obrazovke
+                                canvas.drawBitmap(chicken.getSprite(), (int) (chicken.getAbsX() * scale), (int) (chicken.getAbsY() * this.scale), null);
+                            }
+                        }
+                    }
 
-                //DEBUG Vykreslenie
+                    //Vykreslenie Objektov pred NPC
+                    if (gameThread.getEntityList().size() != 0) {
+                        for (Entity entity : gameThread.getEntityList()) {
+                            if (entity.getAbsX() > (0 - entity.getSprite().getWidth()) && entity.getAbsX() < 1920) {    //Kontrola vykreslovania len tych co maju byt na obrazovke
+                                canvas.drawBitmap(entity.getSprite(), (int) (entity.getAbsX() * scale), (int) (entity.getAbsY() * scale), null);
+                            }
+                        }
+                    }
+
+                    //Vykreslenie SW tlacidiel
+                    canvas.drawBitmap(gameThread.getLeftArrow().getSprite(), (int) (gameThread.getLeftArrow().getAbsX() * scale), (int) (gameThread.getLeftArrow().getAbsY() * scale), null);
+                    canvas.drawBitmap(gameThread.getRightArrow().getSprite(), (int) (gameThread.getRightArrow().getAbsX() * scale), (int) (gameThread.getRightArrow().getAbsY() * scale), null);
+                    canvas.drawBitmap(gameThread.getReloadAmmunition().getSprite(), (int) (gameThread.getReloadAmmunition().getAbsX() * scale), (int) (gameThread.getReloadAmmunition().getAbsY() * scale), null);
+
+                    //Vykreslenie nabojov
+                    for (int i = 0; i < gameThread.AMMO_COUNT; i++) {
+                        Ammunition ammo = gameThread.getAmmunition()[i];
+                        if (ammo.isVisible()) {
+                            canvas.drawBitmap(ammo.getSprite(), (int) (ammo.getAbsX() * scale), (int) (ammo.getAbsY() * scale), null);
+                        }
+                    }
+
+                    //Vykreslenie casu do konca hry
+                    Paint timerColor = new Paint();
+                    timerColor.setTextSize(64);
+                    if (gameThread.getGameTime() <= 20) {
+                        timerColor.setColor(Color.RED);
+                    } else {
+                        timerColor.setColor(Color.BLACK);
+                    }
+                    canvas.drawText(Integer.toString(gameThread.getGameTime()), (int) ((this.displaySizeX / 2) - 64), (int) (65 * scale), timerColor);
+
+                    //Vykreslenie score
+                    Paint scoreColor = new Paint(Color.BLACK);
+                    scoreColor.setTextSize(64);
+                    canvas.drawText("SCORE: " + Integer.toString(gameThread.getScore()), (int) (10 * scale), (int) (65 * scale), scoreColor);
+
+                    //DEBUG Vykreslenie
                 /*
                 Paint textColor = new Paint(Color.BLACK);
                 textColor.setTextSize(32);
                 canvas.drawText(("X: " + touchX + "   Y: " + touchY + " TOUCH: " + touch), 33, 33, textColor);  //TOUCH PROPERTIES
                 canvas.drawText("X: " + this.displaySizeX + "   Y: " + this.displaySizeY, 33, 66, textColor);   //DISPLAY SIZE
                 */
+                }
             } catch (NullPointerException e) {
                 System.out.println("Nullptr Exception - probably a missing sprite!");
             }
