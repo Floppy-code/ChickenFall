@@ -207,7 +207,7 @@ public class GameThread extends Thread {
             if(chicken.getAbsX() == 0 || chicken.getAbsY() == 0) {
                 int randomX = rand.nextInt(upperLimitX - lowerLimitX) + lowerLimitX;
                 int randomY = rand.nextInt(upperLimitY - lowerLimitY) + lowerLimitY;
-                chicken.setAbsX(randomX - this.levelBackground.getPosX());
+                chicken.setAbsX(randomX + this.levelBackground.getPosX());
                 chicken.setAbsY(randomY);
                 chicken.setScreenX(chicken.getAbsX());
                 chicken.setScreenY(chicken.getAbsY());
