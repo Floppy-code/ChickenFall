@@ -31,6 +31,8 @@ public class GameView extends SurfaceView {
 
     private Background gameBackground = null;
     private Background menuBackground = null;
+    private Background scoreBackground = null;
+
 
     public GameView(Context context) {
         super(context);
@@ -134,6 +136,10 @@ public class GameView extends SurfaceView {
         menuBackground.setSprite(BitmapFactory.decodeResource(getResources(), menuBackground.getSpriteLocation()));
         menuBackground.setSprite(changeBitmapSize(menuBackground.getSprite(), (int)(1920 * scale), (int)(1080 * scale)));
 
+        scoreBackground = new Background(R.mipmap.score_board, 0, 0);
+        scoreBackground.setSprite(BitmapFactory.decodeResource(getResources(), scoreBackground.getSpriteLocation()));
+        scoreBackground.setSprite(changeBitmapSize(scoreBackground.getSprite(), (int)(1920 * scale), (int)(1080 * scale)));
+
         //KONFIGURACIA NPC
         try {
             for (Chicken chickenNPC : gameThread.getNpcChickenList()) {
@@ -205,13 +211,21 @@ public class GameView extends SurfaceView {
 
     private void drawMenu(Canvas c) {
         c.drawBitmap(menuBackground.getSprite(), menuBackground.getPosX(), menuBackground.getPosY(), null);
+
         Paint text = new Paint(Color.BLACK);
-        text.setTextSize(128);
+        text.setTextSize((int)(128 * scale));
         c.drawText("START GAME", (int)(565 * scale), (int)(540 * scale), text);
     }
 
     public void drawScore(Canvas c) {
+        c.drawBitmap(scoreBackground.getSprite(), scoreBackground.getPosX(), scoreBackground.getPosY(), null);
 
+        Paint text = new Paint(Color.BLACK);
+        text.setTextSize((int)(128 * scale));
+        c.drawText("YOUR SCORE IS", (int)(490 * scale), (int)(175 * scale), text);
+        c.drawText(Integer.toString(gameThread.getScore()),(int)(800 * scale), (int)(302 * scale), text);
+
+        c.drawText("REPLAY GAME", (int)(535 * scale), (int)(604 * scale), text);
     }
 
     @Override

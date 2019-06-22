@@ -9,6 +9,8 @@ public class Chicken extends Entity {
     private boolean hit;
     private boolean direction; //false - dolava      true - doprava
     private boolean spriteDirection; //false - dolava      true - doprava
+    private int screenX;
+    private int screenY;
     private int distanceFromScreen;
     private int[] spriteLocationArray;
     private Bitmap[] sprites;
@@ -34,15 +36,21 @@ public class Chicken extends Entity {
             if(direction) {
                 this.setAbsY(this.getAbsY() + 15);
                 this.setAbsX(this.getAbsX() + (chickenSpeed - (distanceFromScreen / 50)));
+                this.screenY = (this.getScreenY() + 15);
+                this.screenX = (this.getScreenX() + (chickenSpeed - (distanceFromScreen / 50)));
             } else {
                 this.setAbsY(this.getAbsY() + 15);
                 this.setAbsX(this.getAbsX() - (chickenSpeed - (distanceFromScreen / 50)));
+                this.screenY = (this.getScreenY() + 15);
+                this.screenX = (this.getScreenX() - (chickenSpeed - (distanceFromScreen / 50)));
             }
         } else {
             if(direction) {
                 this.setAbsX(this.getAbsX() + (chickenSpeed - (distanceFromScreen / 50)));
+                this.screenX = (this.screenX + (chickenSpeed - (distanceFromScreen / 50)));
             } else {
                 this.setAbsX(this.getAbsX() - (chickenSpeed - (distanceFromScreen / 50)));
+                this.screenX = (this.screenX - (chickenSpeed - (distanceFromScreen / 50)));
             }
         }
         frame++;
@@ -67,6 +75,22 @@ public class Chicken extends Entity {
             return sprites[0];
         }
         return sprites[0];
+    }
+
+    public int getScreenX() {
+        return screenX;
+    }
+
+    public void setScreenX(int screenX) {
+        this.screenX = screenX;
+    }
+
+    public int getScreenY() {
+        return screenY;
+    }
+
+    public void setScreenY(int screenY) {
+        this.screenY = screenY;
     }
 
     public int[] getSpriteLocationArray() {

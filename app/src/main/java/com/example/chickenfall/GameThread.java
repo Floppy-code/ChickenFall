@@ -16,8 +16,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     - Pocitanie nabojov v zbrani    DONE
     - Reloadovanie zbrane (aj zvuk) DONE
     - Pocitanie skore               DONE
-    - Menu
-    - Vysledna screen
+    - Menu                          DONE
+    - Vysledna screen               DONE
+    - Fixnut otacanie kuriat        DONE
+    - Fixnut skalovanie menu        DONE
+    - Crash fix
+
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  */
 
@@ -26,13 +30,14 @@ public class GameThread extends Thread {
     private GameView view;
     private boolean run = false;
 
-    public static final int CHICKEN_COUNT = 5;
+    public static final int CHICKEN_COUNT = 8;
     public static final int ENTITY_SPRITE_COUNT = 1;
     public static final int ENTITY_GRASS_COUNT = 5;
     public static final int SHOT_WAIT_TIME = 80;
     public static final int RELOAD_WAIT_TIME = 160; //TODO I guess
     public static final int AMMO_COUNT = 6;
     public static final int SCORE_PER_CHICKEN = 25;
+    public static final int DEFAULT_GAME_TIME = 90;
 
     private Background levelBackground = null;
     private ArrayList<Chicken> npcChickenList = null;
@@ -43,7 +48,7 @@ public class GameThread extends Thread {
     private int shotFrameCounter = 2000;
 
     private int timerFrameCounter = 0;
-    private int gameTime = 90;
+    private int gameTime = DEFAULT_GAME_TIME;
 
     private int unusedAmmo = AMMO_COUNT;
     private int score = 0;
@@ -166,6 +171,7 @@ public class GameThread extends Thread {
 
     private void moveScreen(int direction) {
         int cameraMoveSpeed = 8;
+
         if (direction == 1) {
             levelBackground.setPosX(levelBackground.getPosX() + cameraMoveSpeed);
             for (Chicken chicken : npcChickenList) {
@@ -201,8 +207,10 @@ public class GameThread extends Thread {
             if(chicken.getAbsX() == 0 || chicken.getAbsY() == 0) {
                 int randomX = rand.nextInt(upperLimitX - lowerLimitX) + lowerLimitX;
                 int randomY = rand.nextInt(upperLimitY - lowerLimitY) + lowerLimitY;
-                chicken.setAbsX(randomX);
+                chicken.setAbsX(randomX - this.levelBackground.getPosX());
                 chicken.setAbsY(randomY);
+                chicken.setScreenX(chicken.getAbsX());
+                chicken.setScreenY(chicken.getAbsY());
                 chicken.setDirection(rand.nextBoolean());
                 chicken.setDistanceFromScreen((rand.nextInt(upperLimitDist) + lowerLimitDist));
             }
@@ -219,6 +227,13 @@ public class GameThread extends Thread {
                 j = j - 1;
             }
             npcChickenList.get(j + 1).setDistanceFromScreen(key);
+        }
+    }
+
+    private void despawnChickens() {
+        int count = this.npcChickenList.size();
+        for (int i = 0; i < count; i++) {
+            this.npcChickenList.remove(0);
         }
     }
 
@@ -248,6 +263,13 @@ public class GameThread extends Thread {
         }
     }
 
+    private void despawnEntities() {
+        int count = this.entityList.size();
+        for (int i = 0; i < count; i++) {
+            this.entityList.remove(0);
+        }
+    }
+
     private void tick() {
         int leftBorderLimit = 0;
         int rightBorderLimit = -1920;
@@ -255,6 +277,7 @@ public class GameThread extends Thread {
         //Ukoncenie ak je cas 0
         if(this.gameTime == 0) {
             this.endgame = true;
+            this.showMenu = true;
         }
 
         //POSUN OBRAZU
@@ -274,11 +297,11 @@ public class GameThread extends Thread {
 
         //POHYB A TRAFENIE SLIEPOK
         for(Chicken chicken : npcChickenList) {
-            if (chicken.getAbsX() < -230) {
+            if (chicken.getScreenX() < -230) {
                 chicken.setDirection(true);
                 chicken.setSpriteOrientation(true);
             }
-            if (chicken.getAbsX() > 1920) {
+            if (chicken.getScreenX() > 3840) {
                 chicken.setDirection(false);
                 chicken.setSpriteOrientation(false);
             }
@@ -340,6 +363,36 @@ public class GameThread extends Thread {
 
     private void tickMenu() {
 
+        if(view.getTouchX() >= 565 && view.getTouchX() <= 565 + 772 && view.isTouch()) {    //LEFT ARROW
+            if(view.getTouchY() <= 400 + 128 && view.getTouchY() >= 400) {
+                this.showMenu = false;
+            }
+        }
+    }
+
+    private void tickScore() {
+        if(view.getTouchX() >= 544 && view.getTouchX() <= 544 + 830 && view.isTouch()) {    //LEFT ARROW
+            if(view.getTouchY() <= 508 + 128 && view.getTouchY() >= 508) {
+                this.endgame = false;
+                this.showMenu = false;
+                this.score = 0;
+                this.run = true;
+                this.unusedAmmo = AMMO_COUNT;
+                this.gameTime = DEFAULT_GAME_TIME;
+
+                this.despawnChickens();
+                this.spawnChickens(GameThread.CHICKEN_COUNT);
+
+                this.view.reloadNullSprites();
+
+                //this.despawnEntities();
+                //this.spawnEntities(2);
+
+                for(int i = 0; i < AMMO_COUNT; i++) {
+                    this.ammunition[i].setVisible(true);
+                }
+            }
+        }
     }
 
     @Override
@@ -356,9 +409,17 @@ public class GameThread extends Thread {
 
             //Tick hry
             if(this.showMenu) {
-                this.tickMenu();
+                if (this.endgame) {
+                    this.tickScore();
+                } else {
+                    this.tickMenu();
+                }
             } else {
-                this.tick();
+                try {
+                    this.tick();
+                } catch (NullPointerException e) {
+                    System.out.println("Nullptr exception - entities are not ready yet!");
+                }
             }
 
             //Vykreslovanie
