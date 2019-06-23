@@ -3,6 +3,7 @@ package com.example.chickenfall;
 import android.graphics.Canvas;
 import android.os.Build;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -28,7 +29,7 @@ public class GameThread extends Thread {
     private GameView view;          //Zakladny view aplikacie
     private boolean run = false;    //Premenna pouzivana pre hlavny while loop hry
 
-    public static final int CHICKEN_COUNT = 8;      //Najvyssi pocet npc ktore mozu byt sucastne na obrazovke
+    public static final int CHICKEN_COUNT = 2;      //Najvyssi pocet npc ktore mozu byt sucastne na obrazovke
     public static final int ENTITY_SPRITE_COUNT = 1;//Urcuje pocet spritov nahodne generovanych entit na mape
     public static final int ENTITY_GRASS_COUNT = 5; //Urcuje pocet Entit s texturov travy vykreslenych na mape
     public static final int SHOT_WAIT_TIME = 80;    //Pocet tikov pocas ktorych nebude mozne vystrelit po predchadzajucom vystrele
@@ -292,7 +293,7 @@ public class GameThread extends Thread {
                 int randomY = rand.nextInt(upperLimitY - lowerLimitY) + lowerLimitY;
                 chicken.setAbsX(randomX + this.levelBackground.getPosX());
                 chicken.setAbsY(randomY);
-                chicken.setScreenX(chicken.getAbsX());
+                chicken.setScreenX(randomX);
                 chicken.setScreenY(chicken.getAbsY());
                 chicken.setDirection(rand.nextBoolean());
                 chicken.setDistanceFromScreen((rand.nextInt(upperLimitDist) + lowerLimitDist));
@@ -517,7 +518,7 @@ public class GameThread extends Thread {
         this.spawnEntities(2);
         view.loadSprites();
 
-        while(run) {
+        while(this.run) {
             Canvas c = null;
 
             //Tick hry

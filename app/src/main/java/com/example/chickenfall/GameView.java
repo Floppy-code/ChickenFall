@@ -100,7 +100,7 @@ public class GameView extends SurfaceView {
                         System.out.println("SURFACE DESTRUCTION EXCEPTION");
                     }
                 }
-                musicPlayer.release();
+                 musicPlayer.release();
             }
         });
     }
