@@ -2,38 +2,22 @@ package com.example.chickenfall;
 
 import android.graphics.Canvas;
 import android.os.Build;
+import android.os.Looper;
+import android.widget.Toast;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Random;
-
-/*
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            TODO LIST
-    - Timer do konca hry            DONE
-    - Pocitanie nabojov v zbrani    DONE
-    - Reloadovanie zbrane (aj zvuk) DONE
-    - Pocitanie skore               DONE
-    - Menu                          DONE
-    - Vysledna screen               DONE
-    - Fixnut otacanie kuriat        DONE
-    - Fixnut skalovanie menu        DONE
-    - Crash fix
-    - Stringy ulozit do string.xml
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
- */
 
 public class GameThread extends Thread {
 
     private GameView view;          //Zakladny view aplikacie
     private boolean run = false;    //Premenna pouzivana pre hlavny while loop hry
 
-    public static final int CHICKEN_COUNT = 2;      //Najvyssi pocet npc ktore mozu byt sucastne na obrazovke
+    public static final int CHICKEN_COUNT = 9;      //Najvyssi pocet npc ktore mozu byt sucastne na obrazovke
     public static final int ENTITY_SPRITE_COUNT = 1;//Urcuje pocet spritov nahodne generovanych entit na mape
     public static final int ENTITY_GRASS_COUNT = 5; //Urcuje pocet Entit s texturov travy vykreslenych na mape
     public static final int SHOT_WAIT_TIME = 80;    //Pocet tikov pocas ktorych nebude mozne vystrelit po predchadzajucom vystrele
-    public static final int RELOAD_WAIT_TIME = 160; //Pocet tikov pocas ktorych nebude mozne vystrelit po nabiti zbrane
+    //public static final int RELOAD_WAIT_TIME = 160; //Pocet tikov pocas ktorych nebude mozne vystrelit po nabiti zbrane
     public static final int AMMO_COUNT = 6;         //Pocet nabojov v zbrani
     public static final int SCORE_PER_CHICKEN = 25; //Skore pridane za zasah jedneho NPC
     public static final int DEFAULT_GAME_TIME = 90; //Pocet sekund pocas ktorych je mozne hrat
@@ -47,6 +31,7 @@ public class GameThread extends Thread {
     private int shotFrameCounter = 2000;    //Pocitadlo framov/tikov pocas ktorych nedoslo k vystrelu
 
     private int timerFrameCounter = 0;      //Pocitadlo tikov pre cas hry (60 tikov - 1 sekunda)
+    private int changedGameTime = 0;        //Zmeneny cas hry pouzivatelom
     private int gameTime = DEFAULT_GAME_TIME;   //Zostavajuci cas do konca hry
 
     private int unusedAmmo = AMMO_COUNT;    //Pocet nevystrelenych nabojov zbrane
@@ -98,7 +83,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia pole so spritami pre ukazovatel municie
+     * Vracia pole so spritami pre ukazovatel municie.
      * @return pole spritov
      */
     public Ammunition[] getAmmunition() {
@@ -106,7 +91,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia objekt s pozadim mapy/hry
+     * Vracia objekt s pozadim mapy/hry.
      * @return background entity
      */
     public Background getLevelBackground() {
@@ -114,7 +99,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia zoznam s npc
+     * Vracia zoznam s npc.
      * @return zoznam npc
      */
     public ArrayList<Chicken> getNpcChickenList() {
@@ -122,7 +107,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia tlacidlo pre nabite zbrane
+     * Vracia tlacidlo pre nabite zbrane.
      * @return screenButton nabitia
      */
     public ScreenButton getReloadAmmunition() {
@@ -130,7 +115,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia tlacidlo pre posun obrazu dolava
+     * Vracia tlacidlo pre posun obrazu dolava.
      * @return screenButton posunu vlavo
      */
     public ScreenButton getLeftArrow() {
@@ -138,7 +123,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia tlacidlo pre posun obrazu doprava
+     * Vracia tlacidlo pre posun obrazu doprava.
      * @return screenButton posunu vpravo
      */
     public ScreenButton getRightArrow() {
@@ -146,7 +131,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Sluzi na kontrolu ci skoncila hra
+     * Sluzi na kontrolu ci skoncila hra.
      * @return koniec hry
      */
     public boolean isEndgame() {
@@ -154,7 +139,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Sluzi na kontrolu ci je teraz nutne vykreslovat menu
+     * Sluzi na kontrolu ci je teraz nutne vykreslovat menu.
      * @return vykreslenie menu
      */
     public boolean isShowMenu() {
@@ -162,7 +147,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia skore ktore hrac nahral v poslednom kole
+     * Vracia skore ktore hrac nahral v poslednom kole.
      * @return skore hraca
      */
     public int getScore() {
@@ -170,7 +155,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Nastavi hlavnu premennu pre while loop hry, povoluje alebo zakazuje priebeh hry
+     * Nastavi hlavnu premennu pre while loop hry, povoluje alebo zakazuje priebeh hry.
      * @param state parameter pre hru
      */
     public void setRun(boolean state) {
@@ -178,7 +163,16 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Vracia zoznam entit ktore sluzia napr. na zobrazenie travy, stromov v skratke vsetkych
+     * Nastavi dlzku hry v sekundach.
+     * @param gameTime pocet sekund
+     */
+    public void setGameTime(int gameTime) {
+        this.gameTime = gameTime;
+        this.changedGameTime = gameTime;
+    }
+
+    /**
+     * Vracia zoznam entit ktore sluzia napr. na zobrazenie travy, stromov v skratke vsetkych.
      * objektov ktore niesu pozadie, npc alebo prvok GUI
      * @return
      */
@@ -195,7 +189,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Nastavi pocet pouzitelnych nabojov na povodny maximalny pocet, resetuje
+     * Nastavi pocet pouzitelnych nabojov na povodny maximalny pocet, resetuje.
      * entity nabojov pre GUI na visible
      */
     private void reloadGun() {
@@ -211,7 +205,7 @@ public class GameThread extends Thread {
      * @param btn entita na kontrolu
      * @return entita je oznacena / neoznacena
      */
-    private boolean checkButtonPress(Entity btn) {
+    public boolean checkButtonPress(Entity btn) {
         int buttonSpriteWidth = btn.getSprite().getWidth();
         int buttonSpriteHeight = btn.getSprite().getHeight();
 
@@ -224,7 +218,7 @@ public class GameThread extends Thread {
     }
 
     /**
-     * Kontroluje ci nejaky z hlabnych prvkov GUI nebol stlaceny
+     * Kontroluje ci nejaky z hlabnych prvkov GUI nebol stlaceny.
      * 0 - nic  1 - dolava  2 - doprava  3 - reload
      * @return ktore tlacidlo bolo stlacene
      */
@@ -233,6 +227,23 @@ public class GameThread extends Thread {
         if (this.checkButtonPress(this.rightArrow)) { return 2; }
         if (this.checkButtonPress(this.reloadAmmunition)) { return 3; }
         return 0;
+    }
+
+    /**
+     * Konstroluje ci sa v zadanej oblasti vyskytol dotyk.
+     * @param x int x-suradnica laveho horneho rohu
+     * @param y int y-suradnica laveho horneho rohu
+     * @param height int vyska oblasti
+     * @param width int sirka oblasti
+     * @return
+     */
+    private boolean checkAreaPress(int x,int y, int height, int width) {
+        if(view.getTouchX() >= x && view.getTouchX() <= x + width && view.isTouch()) {
+            if(view.getTouchY() <= y + height && view.getTouchY() >= y) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -467,10 +478,21 @@ public class GameThread extends Thread {
      * Beh hry pocas toho ako sa zobrazuje menu, kontroluje ci neboli tlacidla stlacene.
      */
     private void tickMenu() {
-        if(view.getTouchX() >= 565 && view.getTouchX() <= 565 + 772 && view.isTouch()) {    //LEFT ARROW
-            if(view.getTouchY() <= 400 + 128 && view.getTouchY() >= 400) {
-                this.showMenu = false;
-            }
+        if (this.checkAreaPress(565, 400, 128,772)) { this.showMenu = false; }  //START GAME
+        if (this.checkAreaPress(155, 715, 105, 500)) {
+            this.gameTime = 30;
+            Toast toast = Toast.makeText(view.getContext(), view.getContext().getString(R.string.gametime_30), Toast.LENGTH_SHORT);
+            toast.show();
+        }
+        if (this.checkAreaPress(715, 715, 105, 500)) {
+            this.gameTime = 60;
+            Toast toast = Toast.makeText(view.getContext(), view.getContext().getString(R.string.gametime_60), Toast.LENGTH_SHORT);
+            toast.show();
+        }
+        if (this.checkAreaPress(1265, 715, 105, 500)) {
+            this.gameTime = 90;
+            Toast toast = Toast.makeText(view.getContext(), view.getContext().getString(R.string.gametime_90), Toast.LENGTH_SHORT);
+            toast.show();
         }
     }
 
@@ -479,26 +501,28 @@ public class GameThread extends Thread {
      * vsetky potrebne atributy pre opakovany beh hry.
      */
     private void tickScore() {
-        if(view.getTouchX() >= 544 && view.getTouchX() <= 544 + 830 && view.isTouch()) {    //LEFT ARROW
-            if(view.getTouchY() <= 508 + 128 && view.getTouchY() >= 508) {
-                this.endgame = false;
-                this.showMenu = false;
-                this.score = 0;
-                this.run = true;
-                this.unusedAmmo = AMMO_COUNT;
+        if(this.checkAreaPress(544, 508, 128, 830)) {
+            this.endgame = false;
+            this.showMenu = false;
+            this.score = 0;
+            this.run = true;
+            this.unusedAmmo = AMMO_COUNT;
+            if (changedGameTime != 0) {
+                this.gameTime = this.changedGameTime;
+            } else {
                 this.gameTime = DEFAULT_GAME_TIME;
+            }
 
-                this.despawnChickens();
-                this.spawnChickens(GameThread.CHICKEN_COUNT);
+            this.despawnChickens();
+            this.spawnChickens(GameThread.CHICKEN_COUNT);
 
-                this.despawnEntities();
-                this.spawnEntities(2);
+            this.despawnEntities();
+            this.spawnEntities(2);
 
-                this.view.loadSprites();
+            this.view.loadSprites();
 
-                for(int i = 0; i < AMMO_COUNT; i++) {
-                    this.ammunition[i].setVisible(true);
-                }
+            for(int i = 0; i < AMMO_COUNT; i++) {
+                this.ammunition[i].setVisible(true);
             }
         }
     }
@@ -513,6 +537,8 @@ public class GameThread extends Thread {
         super.run();
         long lastTime = System.nanoTime();
         int frames = 0;
+
+        Looper.prepare();
 
         this.spawnChickens(GameThread.CHICKEN_COUNT);
         this.spawnEntities(2);
@@ -544,7 +570,9 @@ public class GameThread extends Thread {
                     c = view.getHolder().lockCanvas();
                 }
                 synchronized (view.getHolder()) {
-                    view.draw(c);
+                    if (c != null) {
+                        view.draw(c);
+                    }
                 }
             } finally {
                 if (c != null) {

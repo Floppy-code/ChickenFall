@@ -38,6 +38,8 @@ public class GameView extends SurfaceView {
     private Background menuBackground = null;   //Pozadie pre menu
     private Background scoreBackground = null;  //Pozadie pre skore
 
+    private ScreenButton menuButtonBackground;  //Pozadie tlacidiel v menu
+
 
     /**
      * Konstruktor pre GameView, prebera kontext a inicializuje sa v nom Music Player, GameThread,
@@ -58,7 +60,7 @@ public class GameView extends SurfaceView {
 
         this.scale = (double) displaySizeY / 1080;
 
-        gameThread = new GameThread(this);
+        this.gameThread = new GameThread(this);
 
         sHolder = getHolder();
         sHolder.addCallback(new SurfaceHolder.Callback() {
@@ -91,16 +93,19 @@ public class GameView extends SurfaceView {
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
                 boolean retry = true;
+
+                //Zastavenie while loopu hry
                 gameThread.setRun(false);
+                
                 while(retry) {
                     try {
-                        gameThread.join();
+                        gameThread.join();  //Pripojenie hlavneho threadu
                         retry = false;
                     } catch (InterruptedException e) {
                         System.out.println("SURFACE DESTRUCTION EXCEPTION");
                     }
                 }
-                 musicPlayer.release();
+                 musicPlayer.release();     //Release media playeru
             }
         });
     }
@@ -166,7 +171,7 @@ public class GameView extends SurfaceView {
     }
 
     /**
-     * Nastavi orientaciu spritu pre dane npc
+     * Nastavi orientaciu spritu pre dane npc.
      * @param chicken npc
      * @param orientation smer orientacie spritu
      */
@@ -230,6 +235,8 @@ public class GameView extends SurfaceView {
             gameThread.getRightArrow().setSprite(BitmapFactory.decodeResource(getResources(), gameThread.getRightArrow().getSpriteLocation()));
             gameThread.getReloadAmmunition().setSprite(BitmapFactory.decodeResource(getResources(), gameThread.getReloadAmmunition().getSpriteLocation()));
             gameThread.getReloadAmmunition().setSprite(changeBitmapSize(gameThread.getReloadAmmunition().getSprite(), (int) (75 * scale), (int) (75 * scale)));
+            menuButtonBackground = new ScreenButton(R.mipmap.menu_box, 0, 0);
+            menuButtonBackground.setSprite(BitmapFactory.decodeResource(getResources(), menuButtonBackground.getSpriteLocation(), null));
         } catch (NullPointerException e) {
             System.out.println("Nullptr exception - GUI sprites not found!");
         }
@@ -280,7 +287,7 @@ public class GameView extends SurfaceView {
     }
 
     /**
-     * Vykreslenie hlavneho menu hry spolu s tlacidlami
+     * Vykreslenie hlavneho menu hry spolu s tlacidlami.
      * @param c canvas na vykreslenie
      */
     private void drawMenu(Canvas c) {
@@ -288,11 +295,32 @@ public class GameView extends SurfaceView {
 
         Paint text = new Paint(Color.BLACK);
         text.setTextSize((int)(128 * scale));
-        c.drawText("START GAME", (int)(565 * scale), (int)(540 * scale), text);
+        menuButtonBackground.setSprite(this.changeBitmapSize(menuButtonBackground.getSprite(), (int)(830 * scale), (int)(135 * scale)));
+        c.drawBitmap(menuButtonBackground.getSprite(), (int)(535 * scale), (int)(426 * scale), null);
+        c.drawText(getContext().getString(R.string.start_button_text), (int)(565 * scale), (int)(540 * scale), text);   //Start tlacidlo
+
+        //Vykreslenie pozadia tlacidiel
+        menuButtonBackground.setSprite(this.changeBitmapSize(menuButtonBackground.getSprite(), (int)(500 * scale), (int)(105 * scale)));
+        c.drawBitmap(menuButtonBackground.getSprite(), (int)(155 * scale), (int)(715 * scale), null);   //30 sec
+        c.drawBitmap(menuButtonBackground.getSprite(), (int)(715 * scale), (int)(715 * scale), null);   //60 sec
+        c.drawBitmap(menuButtonBackground.getSprite(), (int)(1265 * scale), (int)(715 * scale), null);  //90 sec
+
+        //Vykreslenie textu tlacidiel
+        text.setTextSize((int)(96 * scale));
+
+        c.drawText(getContext().getString(R.string.secounds_30_button), (int)(180 * scale), (int)(800 * scale), text);
+        c.drawText(getContext().getString(R.string.secounds_60_button), (int)(740 * scale), (int)(800 * scale), text);
+        c.drawText(getContext().getString(R.string.secounds_90_button), (int)(1290 * scale), (int)(800 * scale), text);
+
+        //DEBUG
+        Paint textColor = new Paint(Color.BLACK);
+        textColor.setTextSize(32);
+        c.drawText(("X: " + touchX + "   Y: " + touchY + " TOUCH: " + touch), 33, 33, textColor);  //TOUCH PROPERTIES
+        c.drawText("X: " + this.displaySizeX + "   Y: " + this.displaySizeY, 33, 66, textColor);   //DISPLAY SIZE
     }
 
     /**
-     * Vykreslenie score screenu hry
+     * Vykreslenie score screenu hry.
      * @param c canvas na vykreslenie
      */
     public void drawScore(Canvas c) {
@@ -300,10 +328,13 @@ public class GameView extends SurfaceView {
 
         Paint text = new Paint(Color.BLACK);
         text.setTextSize((int)(128 * scale));
-        c.drawText("YOUR SCORE IS", (int)(490 * scale), (int)(175 * scale), text);
+        c.drawText(getContext().getString(R.string.score_achieved), (int)(490 * scale), (int)(175 * scale), text);
         c.drawText(Integer.toString(gameThread.getScore()),(int)(800 * scale), (int)(302 * scale), text);
 
-        c.drawText("REPLAY GAME", (int)(535 * scale), (int)(604 * scale), text);
+        //Replay Button
+        menuButtonBackground.setSprite(this.changeBitmapSize(menuButtonBackground.getSprite(), (int)(905 * scale), (int)(135 * scale)));
+        c.drawBitmap(menuButtonBackground.getSprite(), (int)(505 * scale), (int)(490 * scale), null);
+        c.drawText(getContext().getString(R.string.replay_button_text), (int)(535 * scale), (int)(604 * scale), text);
     }
 
     /**
